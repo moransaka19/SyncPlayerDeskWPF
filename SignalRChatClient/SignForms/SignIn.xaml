@@ -1,0 +1,25 @@
+﻿<Window x:Class="SignalRChatClient.SignForms.SignIn"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SignalRChatClient.SignForms"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        mc:Ignorable="d"
+        Title="Sign In" Height="279" Width="196">
+    <Grid Margin="0,0,632,0">
+        <TextBox Name="LoginTB" HorizontalAlignment="Left" Height="24" Margin="19,57,-172,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="153"/>
+        <PasswordBox Name="PasswordTB" PasswordChar="*"  HorizontalAlignment="Left" Height="23" Margin="19,126,-172,0" VerticalAlignment="Top" Width="153" RenderTransformOrigin="0.54,2.174"/>
+        <Button Name="LoginBTN" Click="LoginBTN_Click" Content="Log in" HorizontalAlignment="Left" Margin="109,180,-172,0" VerticalAlignment="Top" Width="63" />
+        <Label Content="Register" HorizontalAlignment="Left" Margin="131,218,-231,0" VerticalAlignment="Top" Width="100" PreviewTouchUp="Register_Click">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDown">
+                    <i:InvokeCommandAction Command="{Binding LabelClicked}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Label>
+        <Label Content="Login" HorizontalAlignment="Left" Margin="19,26,-119,0" VerticalAlignment="Top" Width="100"/>
+        <Label Content="Password" HorizontalAlignment="Left" Margin="19,95,-119,0" VerticalAlignment="Top" Width="100"/>
+
+    </Grid>
+</Window>
