@@ -24,6 +24,7 @@ namespace SyncPlayer.Models
         public string Password { get; set; }
         public string UniqName { get; set; }
         public ICollection<ApplicationUser> UsersIn { get; set; }
+        public string PlaylistPath { get; set; }
 
         #endregion Public Properties
 

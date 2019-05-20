@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,8 +12,8 @@ namespace PLL.Services
     {
         #region Private Fields
 
-        private const string _defaultBlobFilesLocation = @"Media\Download\";
-        private const string _defaultChunkLocation = @"Media\Chunks\";
+        private const string _defaultBlobFilesLocation = @"Download\";
+        private const string _defaultChunkLocation = @"Chunks\";
         private const int _sizeOfChunk = 50000000;
 
         private readonly CloudBlobClient blobClient;
@@ -36,29 +37,33 @@ namespace PLL.Services
 
         #region Public Methods
 
-        public async Task<bool> DownloadFileAsync(string mediaName, string blobFileName, string playlistFolderPath, string roomUniqName)
+        public async Task<string> DownloadFileAsync(string mediaName, IEnumerable<string> blobFileNames, string roomUniqName)
         {
-            var result = true;
-            CloudBlockBlob blockBlob = blobContainer.GetBlockBlobReference(blobFileName);
+            var result = string.Empty;
+            string directoryName = _defaultBlobFilesLocation + mediaName + @"\";
 
-            if (await blockBlob.ExistsAsync())
+            foreach (var blobFileName in blobFileNames)
             {
-                string directoryName = _defaultBlobFilesLocation + mediaName + @"\";
-                Directory.CreateDirectory(directoryName);
 
-                MemoryStream memStream = new MemoryStream();
+                CloudBlockBlob blockBlob = blobContainer.GetBlockBlobReference(blobFileName);
 
-                await blockBlob.DownloadToStreamAsync(memStream);
-
-                using (FileStream fileStream = new FileStream(directoryName + blobFileName.Replace(roomUniqName + " - ", string.Empty), FileMode.OpenOrCreate))
+                if (await blockBlob.ExistsAsync())
                 {
-                    memStream.CopyTo(fileStream);
-                    fileStream.Flush();
+                    Directory.CreateDirectory(directoryName);
+
+                    MemoryStream memStream = new MemoryStream();
+
+                    await blockBlob.DownloadToStreamAsync(memStream);
+
+                    using (FileStream fileStream = new FileStream(directoryName + blobFileName.Replace(roomUniqName + " - ", string.Empty), FileMode.OpenOrCreate))
+                    {
+                        memStream.CopyTo(fileStream);
+                        fileStream.Flush();
+                    }
+
+                    result = directoryName;
                 }
 
-                MergeFile(directoryName, playlistFolderPath);
-
-                result = true;
             }
 
             return result;
@@ -114,9 +119,9 @@ namespace PLL.Services
             return Output;
         }
 
-        public async Task<bool> UploadFileAsync(string fullFilePath, string roomUniqName)
+        public async Task<IEnumerable<string>> UploadFileAsync(string fullFilePath, string roomUniqName)
         {
-            var result = false;
+            var result = new List<string>();
             string folderName = SplitFile(fullFilePath);
 
             if (!string.IsNullOrEmpty(folderName))
@@ -128,8 +133,8 @@ namespace PLL.Services
 
                     CloudBlockBlob blob = blobContainer.GetBlockBlobReference(blobFileName);
                     await blob.UploadFromStreamAsync(stream);
+                    result.Add(blobFileName);
                 }
-                result = true;
             }
 
             return result;

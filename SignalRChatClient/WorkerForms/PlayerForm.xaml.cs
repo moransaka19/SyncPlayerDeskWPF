@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using PLL.Services;
 using SignalRChatClient.WorkerForms;
 using SyncPlayer.Helpers;
 using SyncPlayer.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,12 +20,16 @@ namespace SyncPlayer
         private bool IsPlaying = false;
         private ConnectToRoom _connectToRoom;
         private List<Media> _playlist;
+        private MediaLoadService _mediaLoadService;
+        private AppSettingsReader _appSettingsReader;
 
         public PlayerForm(Room room, IEnumerable<Media> playlist)
         {
             InitializeComponent();
             _roomUsers = new List<string>();
             _playlist = playlist.ToList();
+            _appSettingsReader = new AppSettingsReader();
+            _mediaLoadService = new MediaLoadService((string)_appSettingsReader.GetValue("BlobUrl", typeof(string)), (string)_appSettingsReader.GetValue("ContainerName", typeof(string)));
 
             foreach (var media in _playlist)
             {
@@ -44,7 +50,7 @@ namespace SyncPlayer
 
 
             _connection = new HubConnectionBuilder()
-                .WithUrl("https://sync4u.azurewebsites.net/room", options =>
+                .WithUrl((string)_appSettingsReader.GetValue("ServerHost", typeof(string)), options =>
                 {
                     options.AccessTokenProvider = async () => SessionHelper.ActiveUser.AccessToken;
                 })
@@ -61,7 +67,7 @@ namespace SyncPlayer
             #endregion snippet_ClosedRestart
 
             _connection.On<string>("UserDisconect", (username) => { _roomUsers.Remove(username); UpdateUserList(); });
-            _connection.On<string>("UserConnect", (username) => { _roomUsers.Add(username); UpdateUserList(); });
+            _connection.On<string>("UserConnected", (username) => { _roomUsers.Add(username); UpdateUserList(); });
             _connection.On("RoomClosed", async () =>
             {
                 await _connection.StopAsync();
@@ -72,12 +78,60 @@ namespace SyncPlayer
                     this.Close();
                 }
             });
+            _connection.On<IEnumerable<Media>, string>("RequireMedia", async (models, id) =>
+            {
+                foreach (var item in models)
+                {
+                    var uploadMedia = _playlist.FirstOrDefault(media => {
+                        var sum = 0;
+                        if (media.Album == item.Album)
+                            sum++;
+                        if (media.BitRate == item.BitRate)
+                            sum++;
+                        if (media.Description == item.Description)
+                            sum++;
+                        if (media.Duration == item.Duration)
+                            sum++;
+                        if (media.EndPostiotion == item.EndPostiotion)
+                            sum++;
+                        if (media.Genre == item.Genre)
+                            sum++;
+                        if (media.MimeType == item.MimeType)
+                            sum++;
+                        if (media.Name == item.Name)
+                            sum++;
+                        if (media.Rate == item.Rate)
+                            sum++;
+                        if (media.Singler == item.Singler)
+                            sum++;
+                        if (media.StartPosition == item.StartPosition)
+                            sum++;
+                        if (media.Type == item.Type)
+                            sum++;
+                        return sum >= 10;
+                    });
+
+                    var result = await _mediaLoadService.UploadFileAsync(uploadMedia.FileName, room.UniqName);
+                    await _connection.SendAsync("UploadMedia", id, uploadMedia.Name, result);
+                }
+            });
+            _connection.On<string, IEnumerable<string>>("DownloadMedia", async (fileName, chunks) =>
+            {
+                var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, room.UniqName);
+                _mediaLoadService.MergeFile(folderName, room.PlaylistPath);
+                await _connection.SendAsync("MediaDownloaded");
+            });
+
 
             _connection.On<string, string>("Receive", AddTextToChat);
 
             try
             {
-                Task.Run(async () => await _connection.StartAsync());
+                Task.Run(async () =>
+                {
+                    await _connection.StartAsync();
+                    await _connection.InvokeAsync("CheckMedia", _playlist);
+                });
             }
             catch (Exception ex)
             {
@@ -89,9 +143,10 @@ namespace SyncPlayer
         {
             this.Dispatcher.Invoke(() =>
             {
+                UserListLB.Items.Clear();
                 foreach (var user in _roomUsers)
                 {
-                    messagesList.Items.Add(user);
+                    UserListLB.Items.Add(user);
                 }
             });
         }
