@@ -54,7 +54,7 @@ namespace SyncPlayer
 
 
             _connection = new HubConnectionBuilder()
-                .WithUrl((string)_appSettingsReader.GetValue("ServerHost", typeof(string)), options =>
+                .WithUrl((string)_appSettingsReader.GetValue("ServerHost", typeof(string)) + "room", options =>
                 {
                     options.AccessTokenProvider = async () => SessionHelper.ActiveUser.AccessToken;
                 })
@@ -106,16 +106,23 @@ namespace SyncPlayer
 
             _connection.On<string>("UserDisconect", (username) =>
             {
-                _roomUsers.Remove(username);
-                UpdateUserList();
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    _roomUsers.Remove(username);
+                    UpdateUserList();
+                });
             });
             _connection.On<string>("UserConnected", (username) =>
             {
-                _roomUsers.Add(username);
-                _readyToPLay = false;
-                mePlayer.Pause();
-                btnPlay.IsEnabled = false;
-                UpdateUserList();
+                this.Dispatcher.Invoke(() =>
+                {
+                    _roomUsers.Add(username);
+                    _readyToPLay = false;
+                    mePlayer.Pause();
+                    btnPlay.IsEnabled = false;
+                    UpdateUserList();
+                });
             });
             _connection.On("RoomClosed", async () =>
             {
@@ -135,21 +142,28 @@ namespace SyncPlayer
             });
             _connection.On<Media>("NextMedia", model =>
             {
-                var media = GetMedia(model);
-                mePlayer.Stop();
-                mePlayer.Source = new Uri(media.FileName);
-                mePlayer.Play();
+                this.Dispatcher.Invoke(() =>
+                {
+                    var media = GetMedia(model);
+                    mePlayer.Stop();
+                    mePlayer.Source = new Uri(media.FileName);
+                    mePlayer.Play();
+                });
             });
             _connection.On<string, string>("Receive", AddTextToChat);
             _connection.On<TimeSpan>("Play", (currentTrackTime) =>
             {
-                if (_readyToPLay)
+                this.Dispatcher.Invoke(() =>
                 {
-                    mePlayer.Play();
-                }
+                    if (_readyToPLay)
+                    {
+                        mePlayer.Play();
+                    }
+                });
+
             });
-            _connection.On("Pause", () => mePlayer.Pause());
-            _connection.On("Stop", () => mePlayer.Stop());
+            _connection.On("Pause", () => this.Dispatcher.Invoke(() => mePlayer.Pause()));
+            _connection.On("Stop", () => this.Dispatcher.Invoke(() => mePlayer.Stop()));
             _connection.On("ReadyToPlay", () =>
             {
                 _readyToPLay = true;
