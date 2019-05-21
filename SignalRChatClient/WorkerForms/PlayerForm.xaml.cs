@@ -3,6 +3,7 @@ using PLL.Services;
 using SignalRChatClient.WorkerForms;
 using SyncPlayer.Helpers;
 using SyncPlayer.Models;
+using SyncPlayer.Services;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -141,7 +142,8 @@ namespace SyncPlayer
             _connection.On<string, IEnumerable<string>>("DownloadMedia", async (fileName, chunks) =>
             {
                 var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, _room.UniqName);
-                _mediaLoadService.MergeFile(folderName, _room.PlaylistPath);
+                _mediaLoadService.MergeFile(folderName, _room.PlaylistPath, fileName);
+                _playlist.Add(new MediaService().GetMedia(_room.PlaylistPath + fileName));
                 await _connection.SendAsync("MediaDownloaded");
             });
             _connection.On<Media>("NextMedia", model =>

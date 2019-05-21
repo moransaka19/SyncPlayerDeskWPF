@@ -69,7 +69,7 @@ namespace PLL.Services
             return result;
         }
 
-        public bool MergeFile(string folderName, string playlistFolderPath)
+        public bool MergeFile(string folderName, string playlistFolderPath, string baseFileName)
         {
             bool Output = false;
 
@@ -77,25 +77,11 @@ namespace PLL.Services
             {
                 string[] tmpfiles = Directory.GetFiles(folderName, "*.tmp");
 
-                FileStream outPutFile = null;
+                FileStream outPutFile = new FileStream(playlistFolderPath + "\\" + baseFileName + baseFileName.Split('.').Last(), FileMode.OpenOrCreate, FileAccess.Write);
                 string PrevFileName = "";
 
                 foreach (string tempFile in tmpfiles)
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(tempFile);
-                    string baseFileName = fileName.Substring(0, fileName.IndexOf(Convert.ToChar(".")));
-                    string extension = Path.GetExtension(fileName);
-
-                    if (!PrevFileName.Equals(baseFileName))
-                    {
-                        if (outPutFile != null)
-                        {
-                            outPutFile.Flush();
-                            outPutFile.Close();
-                        }
-                        outPutFile = new FileStream(playlistFolderPath + "\\" + baseFileName + extension, FileMode.OpenOrCreate, FileAccess.Write);
-                    }
-
                     int bytesRead = 0;
                     byte[] buffer = new byte[1024];
                     FileStream inputTempFile = new FileStream(tempFile, FileMode.OpenOrCreate, FileAccess.Read);
@@ -123,7 +109,6 @@ namespace PLL.Services
         {
             var result = new List<string>();
             string folderName = SplitFile(fullFilePath);
-
             if (!string.IsNullOrEmpty(folderName))
             {
                 foreach (var tempFilePath in Directory.GetFiles(_defaultChunkLocation + folderName, "*.tmp"))
