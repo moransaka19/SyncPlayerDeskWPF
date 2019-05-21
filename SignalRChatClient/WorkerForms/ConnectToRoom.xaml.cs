@@ -61,6 +61,7 @@ namespace SignalRChatClient.WorkerForms
                     var room = new Room { UniqName = RoomNameTB.Text, Name = RoomNameTB.Text, Password = RoomPasswordTB.Password };
                     if (room.ConntectToRoom())
                     {
+                        room.PlaylistPath = FolderPathTB.Text;
                         PlayerForm playerForm = new PlayerForm(room, Playlist, false);
                         playerForm.Show();
                         this.Close();
@@ -99,6 +100,7 @@ namespace SignalRChatClient.WorkerForms
                     };
                     if (room.CreateRoom())
                     {
+                        room.PlaylistPath = FolderPathTB.Text;
                         PlayerForm playerForm = new PlayerForm(room, Playlist, true);
                         playerForm.Show();
                         this.Close();
