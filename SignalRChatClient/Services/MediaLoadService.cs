@@ -119,7 +119,7 @@ namespace PLL.Services
             return Output;
         }
 
-        public async Task<IEnumerable<string>> UploadFileAsync(string fullFilePath, string roomUniqName)
+        public IEnumerable<string> UploadFile(string fullFilePath, string roomUniqName)
         {
             var result = new List<string>();
             string folderName = SplitFile(fullFilePath);
@@ -132,7 +132,7 @@ namespace PLL.Services
                     var blobFileName = roomUniqName + " - " + tempFilePath.Split('\\').Last();
 
                     CloudBlockBlob blob = blobContainer.GetBlockBlobReference(blobFileName);
-                    await blob.UploadFromStreamAsync(stream);
+                    blob.UploadFromStream(stream);
                     result.Add(blobFileName);
                 }
             }

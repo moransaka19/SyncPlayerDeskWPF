@@ -126,13 +126,17 @@ namespace SyncPlayer
             });
             _connection.On("RoomClosed", async () =>
             {
-                await _connection.StopAsync();
-                if (_connectToRoom == null)
+                await this.Dispatcher.Invoke(async () =>
                 {
-                    _connectToRoom = new ConnectToRoom();
-                    _connectToRoom.Show();
-                    this.Close();
-                }
+                    await _connection.StopAsync();
+                    if (_connectToRoom == null)
+                    {
+                        _connectToRoom = new ConnectToRoom();
+                        _connectToRoom.Show();
+                        this.Close();
+                    }
+                });
+                
             });
             _connection.On<string, IEnumerable<string>>("DownloadMedia", async (fileName, chunks) =>
             {
@@ -178,13 +182,20 @@ namespace SyncPlayer
 
                 _connection.On<IEnumerable<Media>, string>("RequireMedia", async (models, id) =>
                 {
-                    foreach (var media in models)
+                    await this.Dispatcher.Invoke(async () =>
                     {
-                        var uploadMedia = GetMedia(media);
-
-                        var result = await _mediaLoadService.UploadFileAsync(uploadMedia.FileName, _room.UniqName);
-                        await _connection.SendAsync("UploadMedia", id, uploadMedia.Name, result);
-                    }
+                        var path = mePlayer.Source.LocalPath;
+                        foreach (var media in models)
+                        {
+                            GC.SuppressFinalize(mePlayer.Source);
+                            mePlayer.Source = null;
+                            var uploadMedia = GetMedia(media);
+                            var result = _mediaLoadService.UploadFile(uploadMedia.FileName, _room.UniqName);
+                            await _connection.SendAsync("UploadMedia", id, uploadMedia.Name, result);
+                        }
+                        mePlayer.Source = new Uri(path);
+                    });
+                    
                 });
                 _connection.On("RequireNextMedia", () =>
                 {
