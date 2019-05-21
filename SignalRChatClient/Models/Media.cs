@@ -10,7 +10,7 @@ namespace SyncPlayer.Models
         public double BitRate { get; set; }
         public string Description { get; set; }
         public TimeSpan Duration { get; set; }
-        public decimal EndPostiotion { get; set; }
+        public decimal EndPosition { get; set; }
         public string FileName { get; set; }
         public string Genre { get; set; }
         public string MimeType { get; set; }

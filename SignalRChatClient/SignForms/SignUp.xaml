@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SignalRChatClient.SignForms"
         mc:Ignorable="d"
-        Title="Sign Up" Height="395.865" Width="250">
+        Title="Sign Up" Height="395.865" Width="250" MaxHeight="395.865" MaxWidth="250">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -14,10 +14,15 @@
         <TextBox Name="EmailTB"  HorizontalAlignment="Left" Height="23" Margin="27,107,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="191"/>
         <PasswordBox Name="PasswordTB" HorizontalAlignment="Left" Height="23" Margin="27,166,0,0" PasswordChar="*" VerticalAlignment="Top" Width="191"/>
         <PasswordBox x:Name="RepeatPasswordTB" HorizontalAlignment="Left" Height="23" Margin="27,225,0,0" PasswordChar="*" VerticalAlignment="Top" Width="191"/>
-        <Button Name="RegisterBTN" Content="Sign Up" HorizontalAlignment="Left" Margin="143,265,0,0" VerticalAlignment="Top" Width="75" Click="RegisterBTN_Click" RenderTransformOrigin="0.521,3.431"/>
+        <Button Name="RegisterBTN" Content="Sign Up" HorizontalAlignment="Left" Margin="27,334,0,0" VerticalAlignment="Top" Width="75" Click="RegisterBTN_Click" RenderTransformOrigin="0.521,3.431"/>
         <Label Content="Login" HorizontalAlignment="Left" Margin="27,17,0,0" VerticalAlignment="Top" Width="61"/>
         <Label Content="Email" HorizontalAlignment="Left" Margin="27,76,0,0" VerticalAlignment="Top" Width="61"/>
         <Label Content="Password" HorizontalAlignment="Left" Margin="27,135,0,0" VerticalAlignment="Top" Width="61"/>
         <Label Content="Repeat Password" HorizontalAlignment="Left" Margin="27,194,0,0" VerticalAlignment="Top" Width="102"/>
+        <CheckBox Name="AgreementCB"  HorizontalAlignment="Left" Margin="27,265,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.177,1.816" Height="64" Width="205">
+            <TextBlock FontSize="11px" TextWrapping="WrapWithOverflow" Height="64" Width="188">
+                You accept that we dont responsive for all of yours actions with data. You'r responsibility for all your actions.
+            </TextBlock>
+        </CheckBox>
     </Grid>
 </Window>

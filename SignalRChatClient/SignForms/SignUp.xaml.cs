@@ -5,6 +5,7 @@ using System;
 using System.Configuration;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media;
 
 namespace SignalRChatClient.SignForms
 {
@@ -20,38 +21,48 @@ namespace SignalRChatClient.SignForms
 
         private void RegisterBTN_Click(object sender, RoutedEventArgs e)
         {
-            if (EmailTB.Text.Length >= 5 &&
-                LoginTB.Text.Length >= 5 &&
-                PasswordTB.Password.Length >= 5 &&
-                RepeatPasswordTB.Password.Length >= 5)
+            if (AgreementCB.IsChecked == true)
             {
-                if (PasswordTB.Password == RepeatPasswordTB.Password)
+                if (EmailTB.Text.Length >= 5 &&
+                    LoginTB.Text.Length >= 5 &&
+                    PasswordTB.Password.Length >= 5 &&
+                    RepeatPasswordTB.Password.Length >= 5)
                 {
-                    string email = EmailTB.Text;
-                    string password = PasswordTB.Password;
-                    string username = LoginTB.Text;
-                    var user = new ApplicationUser() { Email = email, Username = username, Password = password };
-                    if (new HttpHelper().Request(user, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + "api/Auth/Register"))
+                    if (PasswordTB.Password == RepeatPasswordTB.Password)
                     {
-                        SessionHelper.SetActiveUserSession(user);
-                        ConnectToRoom connectToRoomForm = new ConnectToRoom();
-                        connectToRoomForm.Show();
-                        this.Close();
+                        string email = EmailTB.Text;
+                        string password = PasswordTB.Password;
+                        string username = LoginTB.Text;
+                        var user = new ApplicationUser() { Email = email, Username = username, Password = password };
+                        if (new HttpHelper().Request(user, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + "api/Auth/Register"))
+                        {
+                            SessionHelper.SetActiveUserSession(user);
+                            ConnectToRoom connectToRoomForm = new ConnectToRoom();
+                            connectToRoomForm.Show();
+                            this.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("User with this login or email already exist", "Sync Player");
+                        }
                     }
                     else
                     {
-                        throw new Exception();
+                        RepeatPasswordTB.Password = string.Empty;
+                        RepeatPasswordTB.Focus();
                     }
                 }
                 else
                 {
-                    RepeatPasswordTB.Password = string.Empty;
-                    RepeatPasswordTB.Focus();
+                    EmailTB.Focus();
                 }
             }
             else
             {
-                EmailTB.Focus();
+                var converter = new BrushConverter();
+                var brush = (Brush)converter.ConvertFromString("#FF0000");
+                AgreementCB.BorderBrush = brush;
+                AgreementCB.Background = brush;
             }
         }
 

@@ -20,8 +20,11 @@ namespace SyncPlayer.Helpers
             if (user != null)
             {
                 ActiveUser = new HttpHelper().Request<ApplicationUser, ApplicationUser>(user, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + "/api/Auth/Login");
-                ActiveUser.Password = user.Password;
-                SessionStart = DateTime.Now;
+                if (ActiveUser != null)
+                {
+                    ActiveUser.Password = user.Password;
+                    SessionStart = DateTime.Now;
+                }
             }
 
             return ActiveUser != null;

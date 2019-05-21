@@ -43,7 +43,7 @@ namespace SignalRChatClient.SignForms
                 }
                 else
                 {
-                    throw new Exception();
+                    MessageBox.Show("Invalid login or password", "Sync Player");
                 }
             }
             else
@@ -52,7 +52,7 @@ namespace SignalRChatClient.SignForms
             }
         }
 
-        private void Register_Click(object sender, TouchEventArgs e)
+        private void Register_Click(object sender, RoutedEventArgs e)
         {
             SignUp signUpForm = new SignUp();
             signUpForm.Show();

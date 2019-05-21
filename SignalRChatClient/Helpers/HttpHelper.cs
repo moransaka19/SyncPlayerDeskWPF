@@ -29,11 +29,17 @@ namespace SyncPlayer.Helpers
                 streamWriter.Close();
             }
 
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            try
             {
-                if (streamReader.Peek() > -1)
-                    result = typeof(TAnswer) != typeof(string) ? JsonConvert.DeserializeObject<TAnswer>(streamReader.ReadToEnd()) : (TAnswer)Convert.ChangeType(streamReader.ReadToEnd(), typeof(string));
+                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    if (streamReader.Peek() > -1)
+                        result = typeof(TAnswer) != typeof(string) ? JsonConvert.DeserializeObject<TAnswer>(streamReader.ReadToEnd()) : (TAnswer)Convert.ChangeType(streamReader.ReadToEnd(), typeof(string));
+                }
+            }
+            catch
+            {
             }
 
             return result;
@@ -54,9 +60,18 @@ namespace SyncPlayer.Helpers
                 streamWriter.Flush();
                 streamWriter.Close();
             }
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
-            return httpResponse.StatusCode == HttpStatusCode.OK;
+            var result = false;
+            try
+            {
+                result = ((HttpWebResponse)httpWebRequest.GetResponse()).StatusCode == HttpStatusCode.OK;
+            }
+            catch
+            {
+                result = false;
+            }
+
+            return result;
         }
 
         #endregion Public Methods

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SignalRChatClient.WorkerForms"
         mc:Ignorable="d"
-        Title="Connect To Room" Height="215.96" Width="591.917">
+        Title="Connect To Room" Height="215" Width="600" MaxHeight="215" MaxWidth="600">
     <Grid>
         <TextBox Name="RoomNameTB" HorizontalAlignment="Left" Height="23" Margin="10,41,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="235"/>
         <PasswordBox Name="RoomPasswordTB" HorizontalAlignment="Left" Height="23" Margin="10,100,0,0" PasswordChar="*" VerticalAlignment="Top" Width="235"/>

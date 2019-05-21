@@ -61,7 +61,7 @@ namespace SignalRChatClient.WorkerForms
                     var room = new Room { UniqName = RoomNameTB.Text, Name = RoomNameTB.Text, Password = RoomPasswordTB.Password };
                     if (room.ConntectToRoom())
                     {
-                        PlayerForm playerForm = new PlayerForm(room, Playlist);
+                        PlayerForm playerForm = new PlayerForm(room, Playlist, false);
                         playerForm.Show();
                         this.Close();
                     }
@@ -78,7 +78,7 @@ namespace SignalRChatClient.WorkerForms
             }
             else
             {
-                System.Windows.MessageBox.Show("Fill playlist", "Sync Player");
+                System.Windows.MessageBox.Show("You did not select playlist folder, or folder does not contain files with available formats", "Sync Player");
             }
         }
 
@@ -99,7 +99,7 @@ namespace SignalRChatClient.WorkerForms
                     };
                     if (room.CreateRoom())
                     {
-                        PlayerForm playerForm = new PlayerForm(room, Playlist);
+                        PlayerForm playerForm = new PlayerForm(room, Playlist, true);
                         playerForm.Show();
                         this.Close();
                     }
@@ -116,7 +116,7 @@ namespace SignalRChatClient.WorkerForms
             }
             else
             {
-                System.Windows.MessageBox.Show("Fill playlist", "Sync Player");
+                System.Windows.MessageBox.Show("You did not select playlist folder, or folder does not contain files with available formats", "Sync Player");
             }
         }
 

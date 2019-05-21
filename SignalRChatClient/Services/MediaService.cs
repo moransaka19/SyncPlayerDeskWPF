@@ -30,7 +30,7 @@ namespace SyncPlayer.Services
                         Description = file.Properties.Description,
                         MimeType = file.MimeType,
                         StartPosition = file.InvariantStartPosition,
-                        EndPostiotion = file.InvariantEndPosition
+                        EndPosition = file.InvariantEndPosition
                     };
                 }
             }
@@ -59,7 +59,7 @@ namespace SyncPlayer.Services
                         Description = file.Properties.Description,
                         MimeType = file.MimeType,
                         StartPosition = file.InvariantStartPosition,
-                        EndPostiotion = file.InvariantEndPosition
+                        EndPosition = file.InvariantEndPosition
                     };
                     result.Add(mediaFile);
                 }
