@@ -17,15 +17,19 @@ namespace SyncPlayer
     {
         private HubConnection _connection;
         private List<string> _roomUsers;
-        private bool IsPlaying = false;
+        private bool _readyToPLay = false;
+        private bool _isHost = false;
         private ConnectToRoom _connectToRoom;
         private List<Media> _playlist;
         private MediaLoadService _mediaLoadService;
         private AppSettingsReader _appSettingsReader;
+        private Room _room;
 
-        public PlayerForm(Room room, IEnumerable<Media> playlist)
+        public PlayerForm(Room room, IEnumerable<Media> playlist, bool isHost)
         {
             InitializeComponent();
+            _room = room;
+            _isHost = isHost;
             _roomUsers = new List<string>();
             _playlist = playlist.ToList();
             _appSettingsReader = new AppSettingsReader();
@@ -66,71 +70,17 @@ namespace SyncPlayer
 
             #endregion snippet_ClosedRestart
 
-            _connection.On<string>("UserDisconect", (username) => { _roomUsers.Remove(username); UpdateUserList(); });
-            _connection.On<string>("UserConnected", (username) => { _roomUsers.Add(username); UpdateUserList(); });
-            _connection.On("RoomClosed", async () =>
-            {
-                await _connection.StopAsync();
-                if (_connectToRoom == null)
-                {
-                    _connectToRoom = new ConnectToRoom();
-                    _connectToRoom.Show();
-                    this.Close();
-                }
-            });
-            _connection.On<IEnumerable<Media>, string>("RequireMedia", async (models, id) =>
-            {
-                foreach (var item in models)
-                {
-                    var uploadMedia = _playlist.FirstOrDefault(media => {
-                        var sum = 0;
-                        if (media.Album == item.Album)
-                            sum++;
-                        if (media.BitRate == item.BitRate)
-                            sum++;
-                        if (media.Description == item.Description)
-                            sum++;
-                        if (media.Duration == item.Duration)
-                            sum++;
-                        if (media.EndPostiotion == item.EndPostiotion)
-                            sum++;
-                        if (media.Genre == item.Genre)
-                            sum++;
-                        if (media.MimeType == item.MimeType)
-                            sum++;
-                        if (media.Name == item.Name)
-                            sum++;
-                        if (media.Rate == item.Rate)
-                            sum++;
-                        if (media.Singler == item.Singler)
-                            sum++;
-                        if (media.StartPosition == item.StartPosition)
-                            sum++;
-                        if (media.Type == item.Type)
-                            sum++;
-                        return sum >= 10;
-                    });
-
-                    var result = await _mediaLoadService.UploadFileAsync(uploadMedia.FileName, room.UniqName);
-                    await _connection.SendAsync("UploadMedia", id, uploadMedia.Name, result);
-                }
-            });
-            _connection.On<string, IEnumerable<string>>("DownloadMedia", async (fileName, chunks) =>
-            {
-                var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, room.UniqName);
-                _mediaLoadService.MergeFile(folderName, room.PlaylistPath);
-                await _connection.SendAsync("MediaDownloaded");
-            });
-
-
-            _connection.On<string, string>("Receive", AddTextToChat);
+            RegisterListeners();
 
             try
             {
                 Task.Run(async () =>
                 {
                     await _connection.StartAsync();
-                    await _connection.InvokeAsync("CheckMedia", _playlist);
+                    if (!isHost)
+                    {
+                        await _connection.InvokeAsync("CheckMedia", _playlist);
+                    }
                 });
             }
             catch (Exception ex)
@@ -149,6 +99,86 @@ namespace SyncPlayer
                     UserListLB.Items.Add(user);
                 }
             });
+        }
+
+        private void RegisterListeners()
+        {
+
+            _connection.On<string>("UserDisconect", (username) =>
+            {
+                _roomUsers.Remove(username);
+                UpdateUserList();
+            });
+            _connection.On<string>("UserConnected", (username) =>
+            {
+                _roomUsers.Add(username);
+                _readyToPLay = false;
+                mePlayer.Pause();
+                btnPlay.IsEnabled = false;
+                UpdateUserList();
+            });
+            _connection.On("RoomClosed", async () =>
+            {
+                await _connection.StopAsync();
+                if (_connectToRoom == null)
+                {
+                    _connectToRoom = new ConnectToRoom();
+                    _connectToRoom.Show();
+                    this.Close();
+                }
+            });
+            _connection.On<string, IEnumerable<string>>("DownloadMedia", async (fileName, chunks) =>
+            {
+                var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, _room.UniqName);
+                _mediaLoadService.MergeFile(folderName, _room.PlaylistPath);
+                await _connection.SendAsync("MediaDownloaded");
+            });
+            _connection.On<Media>("NextMedia", model =>
+            {
+                var media = GetMedia(model);
+                mePlayer.Stop();
+                mePlayer.Source = new Uri(media.FileName);
+                mePlayer.Play();
+            });
+            _connection.On<string, string>("Receive", AddTextToChat);
+            _connection.On<TimeSpan>("Play", (currentTrackTime) =>
+            {
+                if (_readyToPLay)
+                {
+                    mePlayer.Play();
+                }
+            });
+            _connection.On("Pause", () => mePlayer.Pause());
+            _connection.On("Stop", () => mePlayer.Stop());
+            _connection.On("ReadyToPlay", () =>
+            {
+                _readyToPLay = true;
+            });
+
+            if (_isHost)
+            {
+                btnPause.Visibility = Visibility.Visible;
+                btnPlay.Visibility = Visibility.Visible;
+                btnStop.Visibility = Visibility.Visible;
+                btnPlay.IsEnabled = false;
+
+                _connection.On<IEnumerable<Media>, string>("RequireMedia", async (models, id) =>
+                {
+                    foreach (var media in models)
+                    {
+                        var uploadMedia = GetMedia(media);
+
+                        var result = await _mediaLoadService.UploadFileAsync(uploadMedia.FileName, _room.UniqName);
+                        await _connection.SendAsync("UploadMedia", id, uploadMedia.Name, result);
+                    }
+                });
+                _connection.On("RequireNextMedia", () =>
+                {
+                    _playlist.Remove(_playlist.FirstOrDefault(media => media.FileName == mePlayer.Source.LocalPath));
+                    var nextMedia = _playlist.FirstOrDefault();
+                    _connection.SendAsync("SetNextMedia", nextMedia);
+                });
+            }
         }
 
         private void AddTextToChat(string userName, string message)
@@ -210,17 +240,17 @@ namespace SyncPlayer
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            mePlayer.Play();
+            _connection.SendAsync("Play", mePlayer.Position);
         }
 
         private void btnPause_Click(object sender, RoutedEventArgs e)
         {
-            mePlayer.Pause();
+            _connection.SendAsync("Pause", mePlayer.Position);
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
         {
-            mePlayer.Stop();
+            _connection.SendAsync("Stop", mePlayer.Position);
         }
 
         private void PlayerVolume_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
@@ -232,15 +262,47 @@ namespace SyncPlayer
         {
             if (_playlist.Remove(_playlist.FirstOrDefault(media => mePlayer.Source.LocalPath == media.FileName)) && _playlist.Count > 0)
             {
-                mePlayer.Source = new Uri(_playlist.FirstOrDefault().FileName);
-                mePlayer.Play();
-
                 PlayListLB.Items.Clear();
                 foreach (var media in _playlist)
                 {
                     PlayListLB.Items.Add(media.Name);
                 }
+                _connection.SendAsync("TrackEnded");
             }
+        }
+
+        private Media GetMedia(Media externalMedia)
+        {
+            var result = _playlist.FirstOrDefault(media => {
+                var sum = 0;
+                if (media.Album == externalMedia.Album)
+                    sum++;
+                if (media.BitRate == externalMedia.BitRate)
+                    sum++;
+                if (media.Description == externalMedia.Description)
+                    sum++;
+                if (media.Duration == externalMedia.Duration)
+                    sum++;
+                if (media.EndPosition == externalMedia.EndPosition)
+                    sum++;
+                if (media.Genre == externalMedia.Genre)
+                    sum++;
+                if (media.MimeType == externalMedia.MimeType)
+                    sum++;
+                if (media.Name == externalMedia.Name)
+                    sum++;
+                if (media.Rate == externalMedia.Rate)
+                    sum++;
+                if (media.Singler == externalMedia.Singler)
+                    sum++;
+                if (media.StartPosition == externalMedia.StartPosition)
+                    sum++;
+                if (media.Type == externalMedia.Type)
+                    sum++;
+                return sum >= 10;
+            });
+
+            return result;
         }
     }
 }
