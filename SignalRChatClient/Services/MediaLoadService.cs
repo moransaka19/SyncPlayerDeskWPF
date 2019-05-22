@@ -53,14 +53,8 @@ namespace PLL.Services
 
                     MemoryStream memStream = new MemoryStream();
 
-                    await blockBlob.DownloadToStreamAsync(memStream);
-
-                    using (FileStream fileStream = new FileStream(directoryName + blobFileName.Replace(roomUniqName + " - ", string.Empty), FileMode.OpenOrCreate))
-                    {
-                        memStream.CopyTo(fileStream);
-                        fileStream.Flush();
-                    }
-
+                    blockBlob.DownloadToFile(directoryName + blobFileName.Replace(roomUniqName + " - ", string.Empty), FileMode.OpenOrCreate);
+                    
                     result = directoryName;
                 }
 
@@ -77,8 +71,7 @@ namespace PLL.Services
             {
                 string[] tmpfiles = Directory.GetFiles(folderName, "*.tmp");
 
-                FileStream outPutFile = new FileStream(playlistFolderPath + "\\" + baseFileName + baseFileName.Split('.').Last(), FileMode.OpenOrCreate, FileAccess.Write);
-                string PrevFileName = "";
+                FileStream outPutFile = new FileStream(playlistFolderPath + "\\" + baseFileName, FileMode.OpenOrCreate, FileAccess.Write);
 
                 foreach (string tempFile in tmpfiles)
                 {
@@ -89,9 +82,10 @@ namespace PLL.Services
                     while ((bytesRead = inputTempFile.Read(buffer, 0, 1024)) > 0)
                         outPutFile.Write(buffer, 0, bytesRead);
 
+
+                    outPutFile.Flush();
                     inputTempFile.Close();
-                    System.IO.File.Delete(tempFile);
-                    PrevFileName = baseFileName;
+                    File.Delete(tempFile);
                 }
 
                 outPutFile.Close();
