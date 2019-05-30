@@ -82,6 +82,11 @@ namespace SyncPlayer
                     {
                         await _connection.InvokeAsync("CheckMedia", _playlist);
                     }
+                    else
+                    {
+                        var nextMedia = _playlist.FirstOrDefault();
+                        await _connection.SendAsync("SetNextMedia", nextMedia);
+                    }
                 });
             }
             catch (Exception ex)
@@ -143,7 +148,7 @@ namespace SyncPlayer
             {
                 var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, _room.UniqName);
                 _mediaLoadService.MergeFile(folderName, _room.PlaylistPath, fileName);
-                _playlist.Add(new MediaService().GetMedia(_room.PlaylistPath + fileName));
+                _playlist.Add(new MediaService().GetMedia($"{_room.PlaylistPath}\\{fileName}"));
                 await _connection.SendAsync("MediaDownloaded");
             });
             _connection.On<Media>("NextMedia", model =>
@@ -153,7 +158,6 @@ namespace SyncPlayer
                     var media = GetMedia(model);
                     mePlayer.Stop();
                     mePlayer.Source = new Uri(media.FileName);
-                    mePlayer.Play();
                 });
             });
             _connection.On<string, string>("Receive", AddTextToChat);
@@ -173,6 +177,10 @@ namespace SyncPlayer
             _connection.On("ReadyToPlay", () =>
             {
                 _readyToPLay = true;
+                this.Dispatcher.Invoke(() =>
+                {
+                    btnPlay.IsEnabled = true;
+                });
             });
 
             if (_isHost)
@@ -272,12 +280,12 @@ namespace SyncPlayer
 
         private void btnPause_Click(object sender, RoutedEventArgs e)
         {
-            _connection.SendAsync("Pause", mePlayer.Position);
+            _connection.SendAsync("Pause");
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
         {
-            _connection.SendAsync("Stop", mePlayer.Position);
+            _connection.SendAsync("Stop");
         }
 
         private void PlayerVolume_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
