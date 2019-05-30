@@ -209,9 +209,14 @@ namespace SyncPlayer
                 });
                 _connection.On("RequireNextMedia", () =>
                 {
-                    _playlist.Remove(_playlist.FirstOrDefault(media => media.FileName == mePlayer.Source.LocalPath));
-                    var nextMedia = _playlist.FirstOrDefault();
-                    _connection.SendAsync("SetNextMedia", nextMedia);
+                    this.Dispatcher.Invoke( async () => {
+
+                        string currentFilePath = mePlayer.Source.LocalPath;
+                        mePlayer.Source = null;
+                        _playlist.Remove(_playlist.FirstOrDefault(media => media.FileName == mePlayer.Source.LocalPath));
+                        var nextMedia = _playlist.FirstOrDefault();
+                        await _connection.SendAsync("SetNextMedia", nextMedia);
+                    });
                 });
             }
         }
