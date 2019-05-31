@@ -213,7 +213,7 @@ namespace SyncPlayer
 
                         string currentFilePath = mePlayer.Source.LocalPath;
                         mePlayer.Source = null;
-                        _playlist.Remove(_playlist.FirstOrDefault(media => media.FileName == mePlayer.Source.LocalPath));
+                        _playlist.Remove(_playlist.FirstOrDefault(media => media.FileName == currentFilePath));
                         var nextMedia = _playlist.FirstOrDefault();
                         await _connection.SendAsync("SetNextMedia", nextMedia);
                     });
