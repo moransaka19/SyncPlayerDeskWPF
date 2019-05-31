@@ -1,4 +1,5 @@
-﻿using SyncPlayer.Helpers;
+﻿using SignalRChatClient.Models;
+using SyncPlayer.Helpers;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -38,6 +39,11 @@ namespace SyncPlayer.Models
         public bool CreateRoom()
         {
             return new HttpHelper().Request(this, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + "api/Rooms", SessionHelper.ActiveUser.AccessToken);
+        }
+
+        public RoomUserList GetUsersInRoom()
+        {
+            return new HttpHelper().Request<RoomUserList, Room>(null, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + $"api/Rooms/{this.UniqName}", SessionHelper.ActiveUser.AccessToken, "GET");
         }
 
         #endregion Public Methods

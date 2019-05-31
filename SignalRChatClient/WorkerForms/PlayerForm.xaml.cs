@@ -17,7 +17,6 @@ namespace SyncPlayer
     public partial class PlayerForm : Window
     {
         private HubConnection _connection;
-        private List<string> _roomUsers;
         private bool _readyToPLay = false;
         private bool _isHost = false;
         private ConnectToRoom _connectToRoom;
@@ -31,7 +30,6 @@ namespace SyncPlayer
             InitializeComponent();
             _room = room;
             _isHost = isHost;
-            _roomUsers = new List<string>();
             _playlist = playlist.ToList();
             _appSettingsReader = new AppSettingsReader();
             _mediaLoadService = new MediaLoadService((string)_appSettingsReader.GetValue("BlobUrl", typeof(string)), (string)_appSettingsReader.GetValue("ContainerName", typeof(string)));
@@ -100,7 +98,7 @@ namespace SyncPlayer
             this.Dispatcher.Invoke(() =>
             {
                 UserListLB.Items.Clear();
-                foreach (var user in _roomUsers)
+                foreach (var user in _room.GetUsersInRoom().Users)
                 {
                     UserListLB.Items.Add(user);
                 }
@@ -115,7 +113,6 @@ namespace SyncPlayer
 
                 this.Dispatcher.Invoke(() =>
                 {
-                    _roomUsers.Remove(username);
                     UpdateUserList();
                 });
             });
@@ -123,7 +120,6 @@ namespace SyncPlayer
             {
                 this.Dispatcher.Invoke(() =>
                 {
-                    _roomUsers.Add(username);
                     _readyToPLay = false;
                     mePlayer.Pause();
                     btnPlay.IsEnabled = false;

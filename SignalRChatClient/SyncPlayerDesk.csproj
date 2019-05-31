@@ -57,6 +57,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\RoomUserList.cs" />
     <Compile Include="Services\MediaLoadService.cs" />
     <Compile Include="Services\MediaService.cs" />
     <Compile Include="SignForms\SignIn.xaml.cs">
