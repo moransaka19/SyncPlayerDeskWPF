@@ -33,7 +33,7 @@ namespace SignalRChatClient.SignForms
                         string email = EmailTB.Text;
                         string password = PasswordTB.Password;
                         string username = LoginTB.Text;
-                        var user = new ApplicationUser() { Email = email, Username = username, Password = password };
+                        var user = new ApplicationUser() { Email = email, UserName = username, Password = password };
                         if (new HttpHelper().Request(user, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + "api/Auth/Register"))
                         {
                             SessionHelper.SetActiveUserSession(user);

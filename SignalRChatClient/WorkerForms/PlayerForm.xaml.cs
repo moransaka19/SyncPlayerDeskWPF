@@ -100,7 +100,7 @@ namespace SyncPlayer
                 UserListLB.Items.Clear();
                 foreach (var user in _room.GetUsersInRoom().Users)
                 {
-                    UserListLB.Items.Add(user);
+                    UserListLB.Items.Add(user.UserName);
                 }
             });
         }

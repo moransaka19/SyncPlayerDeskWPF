@@ -35,7 +35,7 @@ namespace SignalRChatClient.SignForms
                 string email = LoginTB.Text;
                 string password = PasswordTB.Password;
                 //httpPost validation
-                if (SessionHelper.SetActiveUserSession(new ApplicationUser { Username = email, Password = password }))
+                if (SessionHelper.SetActiveUserSession(new ApplicationUser { UserName = email, Password = password }))
                 {
                     ConnectToRoom connectToRoomForm = new ConnectToRoom();
                     connectToRoomForm.Show();

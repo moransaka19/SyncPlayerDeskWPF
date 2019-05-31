@@ -14,20 +14,24 @@ namespace SyncPlayer.Helpers
             where TAnswer : class
             where TModel : class
         {
-            TAnswer result = default(TAnswer);
-            string json = bodyObject != null ? JsonConvert.SerializeObject(bodyObject) : string.Empty;
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(requestUrl);
-            httpWebRequest.ContentType = contentType;
+            TAnswer result = default(TAnswer);
             httpWebRequest.Method = requestMethod;
+            httpWebRequest.ContentType = contentType;
             httpWebRequest.Headers.Add(HttpRequestHeader.ContentEncoding, encoding);
-            httpWebRequest.Headers.Add("Authorization", "Basic " + barearToken);
+            httpWebRequest.Headers.Add("Authorization", "Bearer " + barearToken);
 
-            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            if (bodyObject != null)
             {
-                streamWriter.Write(json);
-                streamWriter.Flush();
-                streamWriter.Close();
+                string json = JsonConvert.SerializeObject(bodyObject);
+                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                {
+                    streamWriter.Write(json);
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                }
             }
+            
 
             try
             {
@@ -38,8 +42,9 @@ namespace SyncPlayer.Helpers
                         result = typeof(TAnswer) != typeof(string) ? JsonConvert.DeserializeObject<TAnswer>(streamReader.ReadToEnd()) : (TAnswer)Convert.ChangeType(streamReader.ReadToEnd(), typeof(string));
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                var str = ex.Message;
             }
 
             return result;
