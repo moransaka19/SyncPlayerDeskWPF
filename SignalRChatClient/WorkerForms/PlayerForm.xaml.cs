@@ -145,11 +145,7 @@ namespace SyncPlayer
                 var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, _room.UniqName);
                 _mediaLoadService.MergeFile(folderName, _room.PlaylistPath, fileName);
                 _playlist.Add(new MediaService().GetMedia($"{_room.PlaylistPath}\\{fileName}"));
-                PlayListLB.Items.Clear();
-                foreach (var media in _playlist)
-                {
-                    PlayListLB.Items.Add(media.Name);
-                }
+                UpdatePlaylist();
                 await _connection.SendAsync("MediaDownloaded");
             });
             _connection.On<Media>("NextMedia", model =>
@@ -266,6 +262,18 @@ namespace SyncPlayer
                 _connectToRoom.Show();
                 this.Close();
             }
+        }
+
+        private void UpdatePlaylist()
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                PlayListLB.Items.Clear();
+                foreach (var media in _playlist)
+                {
+                    PlayListLB.Items.Add(media.Name);
+                }
+            });
         }
 
         private void timer_Tick(object sender, EventArgs e)
