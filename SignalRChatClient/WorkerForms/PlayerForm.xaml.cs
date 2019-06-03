@@ -236,6 +236,8 @@ namespace SyncPlayer
             {
                 var newMessage = $"{userName}: {message}";
                 messagesList.Items.Add(newMessage);
+                var selectedItem = messagesList.Items.GetItemAt(messagesList.Items.Count - 1);
+                messagesList.ScrollIntoView(selectedItem);
             });
         }
 
@@ -246,21 +248,23 @@ namespace SyncPlayer
 
         private async Task SendMessage()
         {
-            try
+            if (!string.IsNullOrEmpty(messageTextBox.Text.Trim()))
             {
-                #region snippet_InvokeAsync
+                try
+                {
+                    #region snippet_InvokeAsync
 
-                await _connection.InvokeAsync("Message",
-                     messageTextBox.Text);
-                messageTextBox.Clear();
+                    await _connection.InvokeAsync("Message",
+                         messageTextBox.Text);
+                    messageTextBox.Clear();
 
-                #endregion snippet_InvokeAsync
-            }
-            catch (Exception ex)
-            {
-                messagesList.Items.Add(ex.Message);
-            }
-
+                    #endregion snippet_InvokeAsync
+                }
+                catch (Exception ex)
+                {
+                    messagesList.Items.Add(ex.Message);
+                }
+            }   
         }
 
         private async void PlayerForm_FormClosing(object sender, EventArgs e)
