@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SyncPlayer"
         mc:Ignorable="d"
-        Title="" Height="450" Width="1030" MaxHeight="450" MaxWidth="1030">
+        Title="" Height="450" Width="1030" MinHeight="450" MinWidth="1030" MaxHeight="450" MaxWidth="1030">
     <Grid Margin="0,0,2,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>

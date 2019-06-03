@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SignalRChatClient.SignForms"
         mc:Ignorable="d"
-        Title="Sign Up" Height="395.865" Width="250" MaxHeight="395.865" MaxWidth="250">
+        Title="Sign Up" Height="395.865" Width="250" MinHeight="395.865" MinWidth="250" MaxHeight="395.865" MaxWidth="250">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
