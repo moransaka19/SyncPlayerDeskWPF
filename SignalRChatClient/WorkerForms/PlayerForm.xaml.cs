@@ -152,6 +152,7 @@ namespace SyncPlayer
                 var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, _room.UniqName);
                 _mediaLoadService.MergeFile(folderName, _room.PlaylistPath, fileName);
                 _playlist.Add(new MediaService().GetMedia($"{_room.PlaylistPath}\\{fileName}"));
+                _room.Medias = new List<Media>(_playlist);
                 UpdatePlaylist();
                 await _connection.SendAsync("MediaDownloaded");
             });
