@@ -11,7 +11,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Button x:Name="sendButton" Content="Send Message" HorizontalAlignment="Left" Margin="174,373,0,0" VerticalAlignment="Top" Width="83" Click="sendButton_Click" Height="23" />
-        <TextBox x:Name="messageTextBox" HorizontalAlignment="Left" Height="23" Margin="10,373,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="157" RenderTransformOrigin="0.456,2.975"/>
+        <TextBox x:Name="messageTextBox" HorizontalAlignment="Left" Height="23" Margin="10,373,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="157" RenderTransformOrigin="0.456,2.975" KeyDown="MessageTextBox_KeyDown"/>
         <ListBox x:Name="messagesList" HorizontalAlignment="Left" Height="318" Margin="10,26,0,0" VerticalAlignment="Top" Width="246" RenderTransformOrigin="-0.304,0.109" BorderThickness="1" BorderBrush="Gainsboro"/>
         <Label Content="Chat" HorizontalAlignment="Left" Height="26" Margin="10,0,0,0" VerticalAlignment="Top" Width="58"/>
         <ListBox x:Name="UserListLB" Height="170" Margin="877,0,8,205" VerticalAlignment="Bottom" RenderTransformOrigin="-0.304,0.109" BorderThickness="1" BorderBrush="Gainsboro"/>
@@ -33,5 +33,6 @@
         <Slider Name="PlayerVolume"  Value="0.5" HorizontalAlignment="Left" Margin="758,358,0,0" VerticalAlignment="Top" Width="113" Minimum="0" Maximum="1" Thumb.DragCompleted="PlayerVolume_DragCompleted" Height="22"/>
         <ListBox x:Name="PlayListLB" Margin="0,240,6,10" RenderTransformOrigin="-0.304,0.109" BorderThickness="1" BorderBrush="Gainsboro" HorizontalAlignment="Right" Width="138"/>
         <Label Content="Play List" HorizontalAlignment="Left" Height="26" Margin="953,209,0,0" VerticalAlignment="Top" Width="58"/>
+        <Button Name="ResetPlaylistBTN" Content="Reset playlist" HorizontalAlignment="Left" Margin="758,385,0,0" VerticalAlignment="Top" Width="94" Click="ResetPlaylistBTN_Click" />
     </Grid>
 </Window>

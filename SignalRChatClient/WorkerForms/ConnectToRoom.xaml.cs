@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SyncPlayer;
+﻿using SyncPlayer;
 using SyncPlayer.Models;
 using SyncPlayer.Services;
 using System;
@@ -17,8 +16,9 @@ namespace SignalRChatClient.WorkerForms
     {
         #region Private Fields
 
-        private List<Media> Playlist;
+        private readonly string[] _formats = new string[] { "*.mp3", "*.wav", "*.ogg", "*.avi", "*.flv", "*.mkv", "*.mp4" };
         private FolderBrowserDialog DirectoryDialog;
+        private List<Media> Playlist;
 
         #endregion Private Fields
 
@@ -30,23 +30,10 @@ namespace SignalRChatClient.WorkerForms
             {
                 if (DirectoryDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    Playlist.Clear();
-                    string[] formats = { "*.mp3","*.wav", "*.ogg",
-                                         "*.avi","*.flv", "*.mkv", "*.mp4" };
-                    var mediaService = new MediaService();
-                    foreach (string format in formats)
-                    {
-                        foreach (var filePath in Directory.GetFiles(DirectoryDialog.SelectedPath, format, SearchOption.AllDirectories))
-                        {
-                            Playlist.Add(mediaService.GetMedia(filePath));
-                        }
-                    }
                     FolderPathTB.Text = DirectoryDialog.SelectedPath;
-
-                    var text = JsonConvert.SerializeObject(Playlist);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Windows.MessageBox.Show(ex.Message, "Sync Player");
             }
@@ -54,15 +41,18 @@ namespace SignalRChatClient.WorkerForms
 
         private void ConnectBTN_Click(object sender, RoutedEventArgs e)
         {
-            if (Playlist.Count != 0)
+            FillPlayList();
+            if (!string.IsNullOrEmpty(FolderPathTB.Text) &&
+                File.Exists(FolderPathTB.Text))
             {
                 if (RoomNameTB.Text.Length > 5 && RoomPasswordTB.Password.Length > 5)
                 {
                     var room = new Room { UniqName = RoomNameTB.Text, Name = RoomNameTB.Text, Password = RoomPasswordTB.Password };
                     if (room.ConntectToRoom())
                     {
+                        room.Medias = Playlist;
                         room.PlaylistPath = FolderPathTB.Text;
-                        PlayerForm playerForm = new PlayerForm(room, Playlist, false);
+                        PlayerForm playerForm = new PlayerForm(room, false);
                         playerForm.Show();
                         this.Close();
                     }
@@ -79,14 +69,46 @@ namespace SignalRChatClient.WorkerForms
             }
             else
             {
-                System.Windows.MessageBox.Show("You did not select playlist folder, or folder does not contain files with available formats", "Sync Player");
+                System.Windows.MessageBox.Show("You did not select playlist folder, or folder does not exist", "Filmst");
+            }
+        }
+
+        private void FillPlayList()
+        {
+            try
+            {
+                Playlist.Clear();
+                var mediaService = new MediaService();
+                foreach (string format in _formats)
+                {
+                    foreach (var filePath in Directory.GetFiles(DirectoryDialog.SelectedPath, format, SearchOption.AllDirectories))
+                    {
+                        Playlist.Add(mediaService.GetMedia(filePath));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message, "Filmst");
             }
         }
 
         #endregion Private Methods
 
+        #region Public Constructors
+
+        public ConnectToRoom()
+        {
+            InitializeComponent();
+            DirectoryDialog = new FolderBrowserDialog();
+            Playlist = new List<Media>();
+        }
+
+        #endregion Public Constructors
+
         private void CreateRoomBTN_Click(object sender, RoutedEventArgs e)
         {
+            FillPlayList();
             if (Playlist.Count != 0)
             {
                 if (RoomNameTB.Text.Length > 5 && RoomPasswordTB.Password.Length > 5)
@@ -95,19 +117,19 @@ namespace SignalRChatClient.WorkerForms
                     {
                         UniqName = RoomNameTB.Text,
                         Name = RoomNameTB.Text,
-                        Password = RoomPasswordTB.Password,
-                        Medias = Playlist
+                        Password = RoomPasswordTB.Password
                     };
                     if (room.CreateRoom())
                     {
+                        room.Medias = Playlist;
                         room.PlaylistPath = FolderPathTB.Text;
-                        PlayerForm playerForm = new PlayerForm(room, Playlist, true);
+                        PlayerForm playerForm = new PlayerForm(room, true);
                         playerForm.Show();
                         this.Close();
                     }
                     else
                     {
-                        System.Windows.MessageBox.Show("Something went wrong....", "Sync Player");
+                        System.Windows.MessageBox.Show("Something went wrong....", "Filmst");
                     }
                 }
                 else
@@ -118,15 +140,8 @@ namespace SignalRChatClient.WorkerForms
             }
             else
             {
-                System.Windows.MessageBox.Show("You did not select playlist folder, or folder does not contain files with available formats", "Sync Player");
+                System.Windows.MessageBox.Show("You did not select playlist folder, or folder does not contain files with available formats", "Filmst");
             }
-        }
-
-        public ConnectToRoom()
-        {
-            InitializeComponent();
-            DirectoryDialog = new FolderBrowserDialog();
-            Playlist = new List<Media>();
         }
     }
 }

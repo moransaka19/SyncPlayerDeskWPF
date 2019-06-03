@@ -25,12 +25,12 @@ namespace SyncPlayer
         private AppSettingsReader _appSettingsReader;
         private Room _room;
 
-        public PlayerForm(Room room, IEnumerable<Media> playlist, bool isHost)
+        public PlayerForm(Room room, bool isHost)
         {
             InitializeComponent();
             _room = room;
             _isHost = isHost;
-            _playlist = playlist.ToList();
+            _playlist = new List<Media>(_room.Medias);
             _appSettingsReader = new AppSettingsReader();
             _mediaLoadService = new MediaLoadService((string)_appSettingsReader.GetValue("BlobUrl", typeof(string)), (string)_appSettingsReader.GetValue("ContainerName", typeof(string)));
 
@@ -42,7 +42,7 @@ namespace SyncPlayer
             this.Title = room.Name;
             this.Closing += PlayerForm_FormClosing;
 
-            mePlayer.Source = new Uri(playlist.FirstOrDefault().FileName);
+            mePlayer.Source = new Uri(_playlist.FirstOrDefault().FileName);
             mePlayer.Volume = PlayerVolume.Value;
             mePlayer.MediaEnded += MediaEnd;
 
@@ -78,7 +78,7 @@ namespace SyncPlayer
                     await _connection.StartAsync();
                     if (!isHost)
                     {
-                        await _connection.InvokeAsync("CheckMedia", _playlist);
+                        await _connection.InvokeAsync("CheckMedia", _room.Medias);
                     }
                     else
                     {
@@ -179,6 +179,10 @@ namespace SyncPlayer
                     btnPlay.IsEnabled = true;
                 });
             });
+            _connection.On("RequireCheckMedia", async () =>
+            {
+                await _connection.SendAsync("CheckMedia", _room.Medias);
+            });
 
             if (_isHost)
             {
@@ -229,14 +233,18 @@ namespace SyncPlayer
 
         private async void sendButton_Click(object sender, RoutedEventArgs e)
         {
-            #region snippet_ErrorHandling
+            await SendMessage();
+        }
 
+        private async Task SendMessage()
+        {
             try
             {
                 #region snippet_InvokeAsync
 
                 await _connection.InvokeAsync("Message",
                      messageTextBox.Text);
+                messageTextBox.Clear();
 
                 #endregion snippet_InvokeAsync
             }
@@ -245,7 +253,6 @@ namespace SyncPlayer
                 messagesList.Items.Add(ex.Message);
             }
 
-            #endregion snippet_ErrorHandling
         }
 
         private async void PlayerForm_FormClosing(object sender, EventArgs e)
@@ -302,6 +309,11 @@ namespace SyncPlayer
             _connection.SendAsync("Stop");
         }
 
+        private async void ResetPlaylistBTN_Click(object sender, RoutedEventArgs e)
+        {
+            await _connection.SendAsync("SetPlaylist", _room.Medias);
+        }
+
         private void PlayerVolume_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
             mePlayer.Volume = PlayerVolume.Value;
@@ -322,7 +334,7 @@ namespace SyncPlayer
 
         private Media GetMedia(Media externalMedia)
         {
-            var result = _playlist.FirstOrDefault(media => {
+            var result = _room.Medias.FirstOrDefault(media => {
                 var sum = 0;
                 if (media.Album == externalMedia.Album)
                     sum++;
@@ -352,6 +364,14 @@ namespace SyncPlayer
             });
 
             return result;
+        }
+
+        private async void MessageTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.Enter)
+            {
+                await SendMessage();
+            }
         }
     }
 }
