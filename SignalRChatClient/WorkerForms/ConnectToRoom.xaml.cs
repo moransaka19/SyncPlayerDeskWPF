@@ -47,7 +47,7 @@ namespace SignalRChatClient.WorkerForms
             {
                 if (RoomNameTB.Text.Length > 5 && RoomPasswordTB.Password.Length > 5)
                 {
-                    var room = new Room { UniqName = RoomNameTB.Text, Name = RoomNameTB.Text, Password = RoomPasswordTB.Password };
+                    var room = new Room { UniqName = RoomNameTB.Text, Name = RoomNameTB.Text, Password = RoomPasswordTB.Password, Medias = Playlist };
                     if (room.ConntectToRoom())
                     {
                         room.Medias = Playlist;
@@ -117,7 +117,8 @@ namespace SignalRChatClient.WorkerForms
                     {
                         UniqName = RoomNameTB.Text,
                         Name = RoomNameTB.Text,
-                        Password = RoomPasswordTB.Password
+                        Password = RoomPasswordTB.Password,
+                        Medias = Playlist
                     };
                     if (room.CreateRoom())
                     {

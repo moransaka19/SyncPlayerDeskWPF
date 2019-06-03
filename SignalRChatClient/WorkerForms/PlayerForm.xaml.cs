@@ -98,9 +98,13 @@ namespace SyncPlayer
             this.Dispatcher.Invoke(() =>
             {
                 UserListLB.Items.Clear();
-                foreach (var user in _room.GetUsersInRoom().Users)
+                var users = _room.GetUsersInRoom()?.Users;
+                if (users != null)
                 {
-                    UserListLB.Items.Add(user.UserName);
+                    foreach (var user in _room.GetUsersInRoom().Users)
+                    {
+                        UserListLB.Items.Add(user.UserName);
+                    }
                 }
             });
         }
