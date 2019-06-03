@@ -43,7 +43,7 @@ namespace SignalRChatClient.WorkerForms
         {
             FillPlayList();
             if (!string.IsNullOrEmpty(FolderPathTB.Text) &&
-                File.Exists(FolderPathTB.Text))
+                Directory.Exists(FolderPathTB.Text))
             {
                 if (RoomNameTB.Text.Length > 5 && RoomPasswordTB.Password.Length > 5)
                 {

@@ -42,7 +42,10 @@ namespace SyncPlayer
             this.Title = room.Name;
             this.Closing += PlayerForm_FormClosing;
 
-            mePlayer.Source = new Uri(_playlist.FirstOrDefault().FileName);
+            if (_playlist.Any())
+            {
+                mePlayer.Source = new Uri(_playlist.FirstOrDefault().FileName);
+            }
             mePlayer.Volume = PlayerVolume.Value;
             mePlayer.MediaEnded += MediaEnd;
 
