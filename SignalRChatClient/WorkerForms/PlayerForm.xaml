@@ -28,11 +28,13 @@
         </StackPanel>
         <Button x:Name="btnPause" Visibility="Hidden" Margin="277,0,0,10" Click="btnPause_Click" Content="Pause" HorizontalAlignment="Left" Width="44" Height="29" VerticalAlignment="Bottom"/>
         <Button x:Name="btnStop" Visibility="Hidden" Click="btnStop_Click" RenderTransformOrigin="0.613,0.818" Content="Stop" Margin="326,0,0,10" Height="29" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="45"/>
-        <Button x:Name="btnPlay" Visibility="Hidden" Click="btnPlay_Click" Content="Play" Margin="376,0,0,10" RenderTransformOrigin="0.016,0.528" HorizontalAlignment="Left" Width="46" Height="29" VerticalAlignment="Bottom"/>
+        <Button x:Name="btnPlay" 
+                Click="btnPlay_Click" Content="Play" Margin="376,0,0,10" RenderTransformOrigin="0.016,0.528" HorizontalAlignment="Left" Width="46" Height="29" VerticalAlignment="Bottom"/>
+        <Button x:Name="NextMedia"  Click="NextMedia_Click" Content="Next Media" Margin="427,0,0,10" RenderTransformOrigin="0.016,0.528" HorizontalAlignment="Left" Width="75" Height="29" VerticalAlignment="Bottom"/>
+        <Button Name="ResetPlaylistBTN" Content="Reset playlist" HorizontalAlignment="Left" Margin="507,0,0,10" Width="81" Click="ResetPlaylistBTN_Click" Height="28" VerticalAlignment="Bottom" />
         <Label x:Name="lblStatus" Content="Not playing..." HorizontalContentAlignment="Center" Margin="0,351,587,0" HorizontalAlignment="Right" Width="155" Height="29" VerticalAlignment="Top" />
         <Slider Name="PlayerVolume"  Value="0.5" HorizontalAlignment="Left" Margin="758,358,0,0" VerticalAlignment="Top" Width="113" Minimum="0" Maximum="1" Thumb.DragCompleted="PlayerVolume_DragCompleted" Height="22"/>
         <ListBox x:Name="PlayListLB" Margin="0,240,6,10" RenderTransformOrigin="-0.304,0.109" BorderThickness="1" BorderBrush="Gainsboro" HorizontalAlignment="Right" Width="138"/>
         <Label Content="Play List" HorizontalAlignment="Left" Height="26" Margin="953,209,0,0" VerticalAlignment="Top" Width="58"/>
-        <Button Name="ResetPlaylistBTN" Content="Reset playlist" HorizontalAlignment="Left" Margin="758,385,0,0" VerticalAlignment="Top" Width="94" Click="ResetPlaylistBTN_Click" />
     </Grid>
 </Window>

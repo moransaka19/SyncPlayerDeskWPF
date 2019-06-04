@@ -189,6 +189,8 @@ namespace SyncPlayer
                 btnPause.Visibility = Visibility.Visible;
                 btnPlay.Visibility = Visibility.Visible;
                 btnStop.Visibility = Visibility.Visible;
+                NextMedia.Visibility = Visibility.Visible;
+                ResetPlaylistBTN.Visibility = Visibility.Visible;
                 btnPlay.IsEnabled = false;
 
                 _connection.On<IEnumerable<Media>, string>("RequireMedia", async (models, id) =>
@@ -371,6 +373,20 @@ namespace SyncPlayer
             if(e.Key == System.Windows.Input.Key.Enter)
             {
                 await SendMessage();
+            }
+        }
+
+        private async void NextMedia_Click(object sender, RoutedEventArgs e)
+        {
+            await _connection.SendAsync("Stop");
+            if (_playlist.Remove(_playlist.FirstOrDefault(media => mePlayer.Source.LocalPath == media.FileName)) && _playlist.Count > 0)
+            {
+                PlayListLB.Items.Clear();
+                foreach (var media in _playlist)
+                {
+                    PlayListLB.Items.Add(media.Name);
+                }
+                await _connection.SendAsync("TrackEnded");
             }
         }
     }
