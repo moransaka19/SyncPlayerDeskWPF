@@ -42,7 +42,10 @@ namespace SyncPlayer
             this.Title = room.Name;
             this.Closing += PlayerForm_FormClosing;
 
-            mePlayer.Source = new Uri(_playlist.FirstOrDefault().FileName);
+            if (_playlist.Any())
+            {
+                mePlayer.Source = new Uri(_playlist.FirstOrDefault().FileName);
+            }
             mePlayer.Volume = PlayerVolume.Value;
             mePlayer.MediaEnded += MediaEnd;
 
@@ -98,9 +101,13 @@ namespace SyncPlayer
             this.Dispatcher.Invoke(() =>
             {
                 UserListLB.Items.Clear();
-                foreach (var user in _room.GetUsersInRoom().Users)
+                var users = _room.GetUsersInRoom()?.Users;
+                if (users != null)
                 {
-                    UserListLB.Items.Add(user.UserName);
+                    foreach (var user in _room.GetUsersInRoom().Users)
+                    {
+                        UserListLB.Items.Add(user.UserName);
+                    }
                 }
             });
         }
@@ -145,6 +152,7 @@ namespace SyncPlayer
                 var folderName = await _mediaLoadService.DownloadFileAsync(fileName, chunks, _room.UniqName);
                 _mediaLoadService.MergeFile(folderName, _room.PlaylistPath, fileName);
                 _playlist.Add(new MediaService().GetMedia($"{_room.PlaylistPath}\\{fileName}"));
+                _room.Medias = new List<Media>(_playlist);
                 UpdatePlaylist();
                 await _connection.SendAsync("MediaDownloaded");
             });
@@ -230,6 +238,8 @@ namespace SyncPlayer
             {
                 var newMessage = $"{userName}: {message}";
                 messagesList.Items.Add(newMessage);
+                var selectedItem = messagesList.Items.GetItemAt(messagesList.Items.Count - 1);
+                messagesList.ScrollIntoView(selectedItem);
             });
         }
 
@@ -240,21 +250,23 @@ namespace SyncPlayer
 
         private async Task SendMessage()
         {
-            try
+            if (!string.IsNullOrEmpty(messageTextBox.Text.Trim()))
             {
-                #region snippet_InvokeAsync
+                try
+                {
+                    #region snippet_InvokeAsync
 
-                await _connection.InvokeAsync("Message",
-                     messageTextBox.Text);
-                messageTextBox.Clear();
+                    await _connection.InvokeAsync("Message",
+                         messageTextBox.Text);
+                    messageTextBox.Clear();
 
-                #endregion snippet_InvokeAsync
-            }
-            catch (Exception ex)
-            {
-                messagesList.Items.Add(ex.Message);
-            }
-
+                    #endregion snippet_InvokeAsync
+                }
+                catch (Exception ex)
+                {
+                    messagesList.Items.Add(ex.Message);
+                }
+            }   
         }
 
         private async void PlayerForm_FormClosing(object sender, EventArgs e)

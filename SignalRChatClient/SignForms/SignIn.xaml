@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SignalRChatClient.SignForms"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
-        Title="Sign In" Height="280" Width="200" MaxHeight="280" MaxWidth="200">
+        Title="Sign In" Height="280" Width="200" MinHeight="280" MinWidth="200" MaxHeight="280" MaxWidth="200">
     <Grid Margin="0,0,632,0">
         <TextBox Name="LoginTB" HorizontalAlignment="Left" Height="24" Margin="19,57,-172,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="153" KeyDown="Login_KeyDown"/>
         <PasswordBox Name="PasswordTB" PasswordChar="*"  HorizontalAlignment="Left" Height="23" Margin="19,126,-172,0" VerticalAlignment="Top" Width="153" RenderTransformOrigin="0.54,2.174" KeyDown="Login_KeyDown"/>
