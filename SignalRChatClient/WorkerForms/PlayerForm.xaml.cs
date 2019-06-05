@@ -182,8 +182,10 @@ namespace SyncPlayer
             _connection.On("ReadyToPlay", () =>
             {
                 _readyToPLay = true;
-                this.Dispatcher.Invoke(() =>
+                this.Dispatcher.Invoke(async () =>
                 {
+                    var track = _playlist.FirstOrDefault();
+                    await _connection.SendAsync("SetNextMedia", track);
                     btnPlay.IsEnabled = true;
                 });
             });
@@ -325,7 +327,9 @@ namespace SyncPlayer
 
         private async void ResetPlaylistBTN_Click(object sender, RoutedEventArgs e)
         {
-            await _connection.SendAsync("SetPlaylist", _room.Medias);
+            _playlist = new List<Media>(_room.Medias);
+            UpdatePlaylist();
+            await _connection.SendAsync("SetPlaylist", _room.Medias );
         }
 
         private void PlayerVolume_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
@@ -398,7 +402,8 @@ namespace SyncPlayer
                 {
                     PlayListLB.Items.Add(media.Name);
                 }
-                await _connection.SendAsync("TrackEnded");
+                var nextMedia = _playlist.FirstOrDefault();
+                await _connection.SendAsync("SetNextMedia", nextMedia);
             }
         }
     }
