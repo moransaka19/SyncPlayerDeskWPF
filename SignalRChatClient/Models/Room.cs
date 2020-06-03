@@ -41,7 +41,7 @@ namespace SyncPlayer.Models
             return new HttpHelper().Request(this, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + "api/Rooms", SessionHelper.ActiveUser.AccessToken);
         }
 
-        public RoomUserList GetUsersInRoom()
+        public RoomUserList GetUsersInRoom() 
         {
             return new HttpHelper().Request<RoomUserList, Room>(null, new AppSettingsReader().GetValue("ServerHost", typeof(string)) + $"api/Rooms/{this.UniqName}", SessionHelper.ActiveUser.AccessToken, "GET");
         }
